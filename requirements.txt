@@ -1,4 +1,5 @@
-Flask
-zaproxy
+fastapi
 gunicorn
-python-dotenv
+pymongo
+python-dotenv  # If you're using environment variables
+zaproxy  # OWASP ZAP Python API client
