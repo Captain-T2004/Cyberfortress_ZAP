@@ -17,7 +17,7 @@ def active_scan(target, endpoints_json, zap_api_url='http://localhost:8080'):
         print(f"Created new context with ID: {context_id}")
         
         # Add target to context
-        zap.context.include_in_context(context_name, f"^{target}.*$")
+        zap.context.include_in_context(context_name, f"{target}.*")
         print(f"Added {target} to context")
         
         # Set the context in scope
@@ -25,7 +25,8 @@ def active_scan(target, endpoints_json, zap_api_url='http://localhost:8080'):
         print(f"Set context {context_name} in scope")
         
         # Combine discovered URLs with provided endpoints
-        all_endpoints = set([f"{target}{endpoint}" for endpoint in endpoints])
+        all_endpoints = list([f"{target}{endpoint}" for endpoint in endpoints])
+        all_endpoints.sort()
         
         for full_url in all_endpoints:
             print(f"Processing: {full_url}")
@@ -60,7 +61,7 @@ def active_scan(target, endpoints_json, zap_api_url='http://localhost:8080'):
                 
                 unique_alerts = list({v["alert"]: v for v in endpoint_alerts}.values())
                 unique_alerts.append({'alertOrNot': str(alertOrNot)})
-                all_alerts[full_url] = unique_alerts
+                all_alerts[full_url.replace(target, '')] = unique_alerts
                 print(f"Processed {len(unique_alerts)-1} unique alerts for {full_url}")
             
             except Exception as e:

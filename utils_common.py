@@ -15,17 +15,21 @@ def save_scan_results_to_db(all_alerts):
         client = MongoClient(mongo_uri)
         db = client[db_name]
         collection = db[collection_name]
-        
         for endpoint, alerts in all_alerts.items():            
-            # Update the document if it exists, or insert it if it doesn't
+            collection.update_one(
+                {"path": endpoint},
+                {"$set": {"alerts": []}},  # Initialize 'alerts' as an empty list if it doesn't exist
+                upsert=True
+            )
+
+            # Append the new alerts to the existing alerts list
             result = collection.update_one(
-                {"path": endpoint},  # Find the document with the matching path
+                {"path": endpoint},
                 {
-                    "$set": {
-                        "alerts": alerts,  # Update the alerts with the list of alert dictionaries
+                    "$push": {
+                        "alerts": {"$each": alerts}  # Append each alert to the existing alerts list
                     }
-                },
-                upsert=True  # Insert the document if it doesn't exist
+                }
             )
             if result.matched_count > 0:
                 print(f"Updated existing document for path: {endpoint}")
